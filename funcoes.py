@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 import networkx as nx
 import matplotlib.pyplot as plt
 
+#cria a janela inicial, coletando o número de vértices e arestas
 def criar_janela_input():
     layout = [[sg.Text('      ', background_color="#84b6f4")],
             [sg.Text('     Número de vértices:', background_color="#84b6f4", font=('gotham', 16))],
@@ -25,6 +26,7 @@ def criar_janela_input():
 
     return valores['-VERTICES-'], valores['-ARESTAS-']
 
+#cria o grafo e a janela de exibição do grafo
 def criar_janela_grafo(arestas, arestas_arvore):
     G = nx.Graph()
     G.add_weighted_edges_from(arestas)
@@ -42,12 +44,16 @@ def criar_janela_grafo(arestas, arestas_arvore):
     plt.tight_layout()
     plt.show()
 
+#função com o algoritmo kruskal
 def algoritmo_kruskal(num_vertices, num_arestas, arestas):
+
+    #função auxiliar do kruskal
     def encontrar_pai(pai, i):
         if pai[i] == i:
             return i
         return encontrar_pai(pai, pai[i])
 
+    #função auxiliar do kruskal
     def unir_conjuntos(pai, rank, x, y):
         x_raiz = encontrar_pai(pai, x)
         y_raiz = encontrar_pai(pai, y)
@@ -85,6 +91,7 @@ def algoritmo_kruskal(num_vertices, num_arestas, arestas):
 
     return arvore_geradora_minima
 
+#cria a janela que exibe a árvore geradora minima
 def criar_janela_arvore(arestas, arvore_minima):
     layout = [
         [sg.Text('      ', background_color="#84b6f4")],
@@ -107,6 +114,7 @@ def criar_janela_arvore(arestas, arvore_minima):
             window.close()
     window.close()
 
+#cria a janela responsável por coletar os vértices e o peso de cada aresta
 def cria_janela_aresta(i):
     layout =[[sg.Text('      ', background_color="#84b6f4")],
                 [sg.Text(f'          Aresta {i+1}', background_color="#84b6f4", font=('gotham', 20))],
@@ -133,6 +141,7 @@ def cria_janela_aresta(i):
 
     return v1, v2, peso
 
+#função que verifica se a aresta é válida
 def verifica_aresta(arestas_inseridas, v1, v2):
     result = True
 
