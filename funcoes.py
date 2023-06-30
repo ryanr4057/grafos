@@ -36,9 +36,9 @@ def criar_janela_grafo(arestas, arestas_arvore):
     nx.draw_networkx_nodes(G, pos, node_color='#00C000', node_size=600,)
     nx.draw_networkx_labels(G, pos)
     nx.draw_networkx_edges(G, pos, edgelist=arestas, width=1.5, alpha=0.5, edge_color='#000000')
-    labels = {(u, v): f"{peso:.2f}" for (u, v, peso) in arestas_arvore}
+    labels = {(u, v): f"{int(peso)}" for (u, v, peso) in arestas}
     nx.draw_networkx_edges(G, pos, edgelist=arestas_arvore, width=3.5, alpha=0.8, edge_color='#008000')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_color='#000000', font_size= 15)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_color='#000000', font_size= 12)
 
     plt.axis('off')
     plt.tight_layout()
@@ -147,9 +147,6 @@ def verifica_aresta(arestas_inseridas, v1, v2):
 
     if (v1, v2) in arestas_inseridas or (v2, v1) in arestas_inseridas:
         sg.popup('Aresta duplicada! Insira uma aresta válida.', background_color="#84b6f4", font=('gotham', 16),button_color="#131c46",text_color="#FFFFFF", title= "AVISO" )
-        result = False
-    if v1 == v2:
-        sg.popup('Aresta invalida! Insira uma aresta válida.')
         result = False
 
     return result
