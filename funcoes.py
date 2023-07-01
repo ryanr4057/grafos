@@ -1,25 +1,24 @@
 import PySimpleGUI as sg
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 
 #cria a janela inicial, coletando o número de vértices e arestas
 def criar_janela_input():
-    layout = [[sg.Text('      ', background_color="#84b6f4")],
-            [sg.Text('     Número de vértices:', background_color="#84b6f4", font=('gotham', 16))],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.InputText(key='-VERTICES-')],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.Text('     Número de arestas:', background_color="#84b6f4", font=('gotham', 16))],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.InputText(key='-ARESTAS-')],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.Text('      ', background_color="#84b6f4")],
-            [sg.Button('OK', size=8, font=('gotham', 12),button_color= "#131c46", mouseover_colors= "#3c4c8f") ]]
+    layout = [[sg.Text('      ', background_color="#000000")],
+            [sg.Text('NÚMERO DE VÉRTICES:', background_color="#000000", font=('gotham', 16, "bold"), text_color="#F7004F")],
+            [sg.Text('      ', background_color="#000000")],
+            [sg.InputText(key='-VERTICES-', font=('gotham', 20), background_color="#454041", text_color="#FFFFFF")],
+            [sg.Text('      ', background_color="#000000")],
+            [sg.Text('      ', background_color="#000000")],
+            [sg.Text('NÚMERO DE ARESTAS:', background_color="#000000", font=('gotham', 16, "bold"), text_color="#F7004F")],
+            [sg.Text('      ', background_color="#000000")],
+            [sg.InputText(key='-ARESTAS-',  font=('gotham', 20), background_color="#454041", text_color="#FFFFFF")],
+            [sg.Text('      ', background_color="#000000")],
+            [sg.Text('      ', background_color="#000000")],
+            [sg.Button('OK', size=10, font=('gotham', 15, "bold"), button_color= ("#FFFFFF","#F7004F" ))]]
 
-    janela_1 = sg.Window('KRUSKAL', layout, size= (300, 400), background_color= "#84b6f4" )
+    janela_1 = sg.Window('KRUSKAL', layout, size= (300, 400), background_color= "#000000" )
     evento, valores = janela_1.read()
 
     janela_1.close()
@@ -35,10 +34,17 @@ def criar_janela_grafo(arestas, arestas_arvore):
     plt.figure(figsize=(8, 6))
     nx.draw_networkx_nodes(G, pos, node_color='#00C000', node_size=600,)
     nx.draw_networkx_labels(G, pos)
-    nx.draw_networkx_edges(G, pos, edgelist=arestas, width=1.5, alpha=0.5, edge_color='#000000')
     labels = {(u, v): f"{int(peso)}" for (u, v, peso) in arestas}
+
+    widths = [data['weight'] for _, _, data in G.edges(data=True)]
+    scaled_widths = [(w - min(widths))/(max(widths) - min(widths)) for w in widths]
+    scaled_widths = [w * 5 for w in scaled_widths]  # Ajuste o fator de escala conforme necessário
+
+    nx.draw_networkx_edges(G, pos, edgelist=arestas, width=scaled_widths, alpha=0.5, edge_color='#000000')
     nx.draw_networkx_edges(G, pos, edgelist=arestas_arvore, width=3.5, alpha=0.8, edge_color='#008000')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_color='#000000', font_size= 12)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_color='#000000', font_size=12)
+    nx.draw_networkx_nodes(G, pos, node_color='#00C000', node_size=600,)
+    nx.draw_networkx_labels(G, pos)
 
     plt.axis('off')
     plt.tight_layout()
@@ -79,30 +85,33 @@ def algoritmo_kruskal(num_vertices, num_arestas, arestas):
     e = 0
 
     while e < num_vertices - 1:
-        u, v, peso = arestas[i]
-        i += 1
-        x = encontrar_pai(pai, u - 1)  # Subtrai 1 dos índices para ajustar a indexação
-        y = encontrar_pai(pai, v - 1)  # Subtrai 1 dos índices para ajustar a indexação
+        if i < len(arestas):
+            u, v, peso = arestas[i]
+            i += 1
+            x = encontrar_pai(pai, u - 1)  # Subtrai 1 dos índices para ajustar a indexação
+            y = encontrar_pai(pai, v - 1)  # Subtrai 1 dos índices para ajustar a indexação
 
-        if x != y:
+            if x != y:
+                e += 1
+                arvore_geradora_minima.append((u, v, peso))
+                unir_conjuntos(pai, rank, x, y)
+        else:
             e += 1
-            arvore_geradora_minima.append((u, v, peso))
-            unir_conjuntos(pai, rank, x, y)
 
     return arvore_geradora_minima
 
 #cria a janela que exibe a árvore geradora minima
 def criar_janela_arvore(arestas, arvore_minima):
     layout = [
-        [sg.Text('      ', background_color="#84b6f4")],
-        [sg.Text('Árvore Geradora Mínima:',  background_color="#84b6f4", font=('gotham', 16))],
-        [sg.Text('      ', background_color="#84b6f4")],
-        *[[sg.Text(f'Vértice {u} - Vértice {v}: Peso {peso}', background_color="#84b6f4", font=('gotham', 13))] for u, v, peso in arvore_minima],
-        [sg.Text('      ', background_color="#84b6f4")],
-        [sg.Button('FECHAR', size=8, font=('gotham', 12),button_color= "#131c46"),sg.Button('VER GRAFO', size=14, font=('gotham', 12),button_color= "#131c46") ]
+        [sg.Text('      ', background_color="#000000")],
+        [sg.Text('Árvore Geradora Mínima:',  background_color="#000000", font=('gotham', 16, "bold"), text_color="#F7004F")],
+        [sg.Text('      ', background_color="#000000")],
+        *[[sg.Text(f'Vértice {u} - Vértice {v}: Peso {peso}', background_color="#000000", font=('gotham', 13),  text_color="#FFFFFF")] for u, v, peso in arvore_minima],
+        [sg.Text('      ', background_color="#000000")],
+        [sg.Button('FECHAR', size=8, font=('gotham', 15, "bold"), button_color= ("#FFFFFF","#F7004F" )),sg.Button('VER GRAFO', size=13,font=('gotham', 15, "bold"), button_color= ("#FFFFFF","#F7004F" )) ]
     ]
 
-    window = sg.Window('Árvore Geradora Mínima', layout, size= (300, 400), background_color= "#84b6f4")
+    window = sg.Window('Árvore Geradora Mínima', layout, size= (300, 400), background_color= "#000000")
 
     while True:
         evento, valores = window.read()
@@ -116,22 +125,20 @@ def criar_janela_arvore(arestas, arvore_minima):
 
 #cria a janela responsável por coletar os vértices e o peso de cada aresta
 def cria_janela_aresta(i):
-    layout =[[sg.Text('      ', background_color="#84b6f4")],
-                [sg.Text(f'          Aresta {i+1}', background_color="#84b6f4", font=('gotham', 20))],
-                [sg.Text('      ', background_color="#84b6f4")],
-                [sg.Text('Vértice 1:', background_color="#84b6f4", font=('gotham', 16))],
-                [sg.Input(key=f'-V1{i+1}-')],
-                [sg.Text('      ', background_color="#84b6f4")],
-                [sg.Text('Vértice 2:', background_color="#84b6f4", font=('gotham', 16))],
-                [sg.Input(key=f'-V2{i+1}-')],
-                [sg.Text('      ', background_color="#84b6f4")],
-                [sg.Text('Peso:', background_color="#84b6f4", font=('gotham', 16))],
-                [sg.Input(key=f'-PESO{i+1}-')],
-                [sg.Text('      ', background_color="#84b6f4")],
-                [sg.Button('Próxima Aresta', size=15, font=('gotham', 12),button_color= "#131c46", mouseover_colors= "#3c4c8f" )],
+    layout =[
+                [sg.Text(f'          Aresta {i+1}', background_color="#000000", font=('gotham', 20, "bold"),  text_color="#F7004F")],
+                [sg.Text('      ', background_color="#000000")],
+                [sg.Text('Vértice 1:', background_color="#000000", font=('gotham', 18, "bold"),  text_color="#F7004F")],
+                [sg.Input(key=f'-V1{i+1}-', font=('gotham', 20, ),  background_color="#454041", text_color="#FFFFFF")],
+                [sg.Text('Vértice 2:', background_color="#000000", font=('gotham', 18, "bold"),  text_color="#F7004F")],
+                [sg.Input(key=f'-V2{i+1}-', font=('gotham', 20, ),  background_color="#454041", text_color="#FFFFFF")],
+                [sg.Text('Peso:', background_color="#000000", font=('gotham', 18, "bold"),  text_color="#F7004F")],
+                [sg.Input(key=f'-PESO{i+1}-', font=('gotham', 20,),  background_color="#454041", text_color="#FFFFFF")],
+                [sg.Text('      ', background_color="#000000")],
+                [sg.Button('Próxima Aresta', size=13, font=('gotham', 15, "bold"), button_color= ("#FFFFFF","#F7004F" ))],
         ]
 
-    janela = sg.Window('ARESTAS', layout, size= (300, 400), background_color= "#84b6f4" )
+    janela = sg.Window('ARESTAS', layout, size= (300, 400), background_color= "#000000" )
     evento, valores = janela.read()
     janela.close()
 
@@ -146,7 +153,7 @@ def verifica_aresta(arestas_inseridas, v1, v2):
     result = True
 
     if (v1, v2) in arestas_inseridas or (v2, v1) in arestas_inseridas:
-        sg.popup('Aresta duplicada! Insira uma aresta válida.', background_color="#84b6f4", font=('gotham', 16),button_color="#131c46",text_color="#FFFFFF", title= "AVISO" )
+        sg.popup('Aresta duplicada!\nInsira uma aresta válida.\n', background_color="#000000", font=('gotham', 16),button_color=("#FFFFFF","#F7004F" ),text_color="#FFFFFF", title= "AVISO" )
         result = False
 
     return result
