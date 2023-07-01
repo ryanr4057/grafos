@@ -31,16 +31,13 @@ def criar_janela_grafo(arestas, arestas_arvore):
     G.add_weighted_edges_from(arestas)
     pos = nx.spring_layout(G)
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(num= "GRAFO", figsize=(8, 6))
     nx.draw_networkx_nodes(G, pos, node_color='#00C000', node_size=600,)
     nx.draw_networkx_labels(G, pos)
     labels = {(u, v): f"{int(peso)}" for (u, v, peso) in arestas}
 
-    widths = [data['weight'] for _, _, data in G.edges(data=True)]
-    scaled_widths = [(w - min(widths))/(max(widths) - min(widths)) for w in widths]
-    scaled_widths = [w * 5 for w in scaled_widths]  # Ajuste o fator de escala conforme necessário
 
-    nx.draw_networkx_edges(G, pos, edgelist=arestas, width=scaled_widths, alpha=0.5, edge_color='#000000')
+    nx.draw_networkx_edges(G, pos, edgelist=arestas, alpha=0.5, edge_color='#000000')
     nx.draw_networkx_edges(G, pos, edgelist=arestas_arvore, width=3.5, alpha=0.8, edge_color='#008000')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_color='#000000', font_size=12)
     nx.draw_networkx_nodes(G, pos, node_color='#00C000', node_size=600,)
@@ -119,9 +116,11 @@ def criar_janela_arvore(arestas, arvore_minima):
             break
 
         elif evento == 'VER GRAFO':
-            criar_janela_grafo(arestas,arvore_minima)
             window.close()
+            criar_janela_grafo(arestas,arvore_minima)
+
     window.close()
+    main()
 
 #cria a janela responsável por coletar os vértices e o peso de cada aresta
 def cria_janela_aresta(i):
@@ -157,3 +156,22 @@ def verifica_aresta(arestas_inseridas, v1, v2):
         result = False
 
     return result
+
+#função principal para o loop do programa
+def main():
+    num_vertices, num_arestas = criar_janela_input()
+    arestas = []
+    arestas_inseridas = set()
+    if num_arestas != None:
+        for i in range(int(num_arestas)):
+            v1, v2, peso = cria_janela_aresta(i)
+
+            while verifica_aresta(arestas_inseridas, v1, v2) == False:
+                v1, v2, peso = cria_janela_aresta(i)
+            arestas_inseridas.add((v1, v2))
+            arestas.append((v1, v2, peso))
+
+        arvore_minima = algoritmo_kruskal(int(num_vertices), int(num_arestas), arestas)
+        arestas_arvore_minima = [(u, v) for u, v, _ in arvore_minima]
+
+        criar_janela_arvore(arestas, arvore_minima)
