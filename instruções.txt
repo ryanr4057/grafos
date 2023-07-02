@@ -1,0 +1,1 @@
+Executar o atalho 'Aplicativo Grafos' para o funcionamento do App.
